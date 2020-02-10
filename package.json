@@ -17,6 +17,6 @@
   },
   "homepage": "https://github.com/andreybozhkov/pdf-invoice-converter#readme",
   "dependencies": {
-    "pdf2json": "1.1.8"
+    "pdf-parse": "1.1.1"
   }
 }
