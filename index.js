@@ -21,19 +21,28 @@ pdf(dataBuffer).then(function(data) {
     for (let i = 0; i < matches.length; i++) {
         if (new RegExp(regexNum).test(matches[i])) {
             let amount = Number(matches[i]);
-            let projectNum = '';
-            if (new RegExp(regexProjNum).test(matches[i - 1])) {
-                projectNum = matches[i - 1];
+
+            if (lines.length > 0) {
+                if (new RegExp(regexRef).test(matches[i - 1]) === false) {
+                    if (new RegExp(regexNum).test(matches[i - 1])) {
+                        // add current amount to last item in lines array
+                        lines[lines.length - 1].addAmount(amount);
+                    } else if (new RegExp(regexProjNum).test(matches[i - 1])) {
+                        // push new line to the array with project reference
+                        lines.push(addNewLine(amount, i, matches));
+                    }
+                } else {
+                    // push new line to the array without project reference
+                    lines.push(addNewLine(amount, i, matches));
+                }
+            } else {
+                // add first line to the array
+                lines.push(addNewLine(amount, i, matches));
             }
-            let ref = '';
-            if (new RegExp(regexRef).test(matches[i - 2])) {
-                ref = matches[i - 2];
-            }
-            let newLine = new singleLine(projectNum, ref);
-            newLine.addAmount(amount);
-            console.log(newLine);
         }
     }
+
+    console.log(lines);
 });
 
 function singleLine(projNum, ref) {
@@ -43,4 +52,22 @@ function singleLine(projNum, ref) {
     this.addAmount = (amount) => {
         this.summedAmount += amount;
     };
+}
+
+function addNewLine(amount, index, array) {
+    // add a new line
+    let projectNum = '';
+    if (new RegExp(regexProjNum).test(array[index - 1])) {
+        projectNum = array[index - 1];
+    }
+    let ref = '';
+    if (new RegExp(regexRef).test(array[index - 2])) {
+        ref = array[index - 2];
+    }
+    let newLine = new singleLine(projectNum, ref);
+
+    // add the amount to the new line
+    newLine.addAmount(amount);
+
+    return newLine;
 }
