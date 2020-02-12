@@ -107,7 +107,8 @@ function generateWorkbook (data) {
             'Shipment ID': '',
             'NET SUM': '',
             'Gross Sum': '',
-            'Project ID': l.projNum
+            'Project ID': l.projNum,
+            'Shipping Order ID': ''
         });
     });
     //console.log(newData);
