@@ -17,7 +17,7 @@ pdf(dataBuffer).then(function(data) {
     });
     
     let lines = generateLines(matches);
-    console.lig(sumLines(lines));
+    console.log(sumLines(lines));
 });
 
 function singleLine (projNum, ref) {
