@@ -17,6 +17,7 @@
   },
   "homepage": "https://github.com/andreybozhkov/pdf-invoice-converter#readme",
   "dependencies": {
-    "pdf-parse": "1.1.1"
+    "pdf-parse": "1.1.1",
+    "xlsx": "0.15.5"
   }
 }
