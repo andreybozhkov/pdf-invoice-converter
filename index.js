@@ -2,20 +2,14 @@ const fs = require('fs');
 const pdf = require('pdf-parse');
 let regexRef = '\\b2020\\d{5}\\b';
 let regexProjNum = '\\b204\\d{4}\\b';
-//let regexCostType = '\\b[A-Z]{3}\\b';
 let regexNum = '\\b\\d{1,6}\\.\\d{2}\\b';
 let regexpAll = regexRef + '|' + regexProjNum + '|' + regexNum;
 let regexp = new RegExp(regexpAll, 'g')
 
-let dataBuffer = fs.readFileSync('./data/10_v2invoice.pdf');
+let dataBuffer = fs.readFileSync('./data/invoice.pdf');
 
 pdf(dataBuffer).then(function(data) {
     let matches = data.text.match(regexp);
-    fs.writeFile('./data/matches.txt', matches, (err) => {
-        if (err) throw err;
-        console.log('Match file written.');
-    });
-    
     let lines = generateLines(matches);
     console.log(sumLines(lines));
 });
@@ -31,7 +25,7 @@ function singleLine (projNum, ref) {
 
 function generateLines (arrayOfMatches) {
     let lines = [];
-    for (let i = 0; i < arrayOfMatches.length; i++) {
+    for (let i = 0; i < arrayOfMatches.length - 1; i++) {
         if (new RegExp(regexNum).test(arrayOfMatches[i])) {
             let amount = Number(arrayOfMatches[i]);
 
@@ -82,7 +76,7 @@ function addNewLine (amount, index, array) {
 
 function sumLines (linesArray) {
     let sum = 0;
-    linesArray.map(l => {
+    linesArray.forEach(l => {
         sum += l.summedAmount;
     });
     return sum;
