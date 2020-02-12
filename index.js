@@ -22,27 +22,28 @@ pdf(dataBuffer).then(function(data) {
         if (new RegExp(regexNum).test(matches[i])) {
             let amount = Number(matches[i]);
 
-            if (lines.length > 0) {
-                if (new RegExp(regexRef).test(matches[i - 1]) === false) {
-                    if (new RegExp(regexNum).test(matches[i - 1])) {
-                        // add current amount to last item in lines array
-                        lines[lines.length - 1].addAmount(amount);
-                    } else if (new RegExp(regexProjNum).test(matches[i - 1])) {
-                        // push new line to the array with project reference
-                        lines.push(addNewLine(amount, i, matches));
-                    }
-                } else {
-                    // push new line to the array without project reference
-                    lines.push(addNewLine(amount, i, matches));
-                }
-            } else {
+            if (lines.length === 0) {
                 // add first line to the array
                 lines.push(addNewLine(amount, i, matches));
+            } else {
+                if (new RegExp(regexRef).test(matches[i - 1])) {
+                    // push new line to the array without project reference
+                    lines.push(addNewLine(amount, i, matches));
+                } else if (new RegExp(regexProjNum).test(matches[i - 1])) {
+                    if (new RegExp(regexRef).test(matches[i - 2])) {
+                        // push new line to the array with project reference
+                        lines.push(addNewLine(amount, i, matches));
+                    } else if (new RegExp(regexNum).test(matches[i - 2])) {
+                        // add current amount to last item in lines array
+                        lines[lines.length - 1].addAmount(amount);
+                    }
+                } else if (new RegExp(regexNum).test(matches[i - 1])) {
+                    // add current amount to last item in lines array
+                    lines[lines.length - 1].addAmount(amount);
+                }
             }
         }
     }
-
-    console.log(lines);
 });
 
 function singleLine(projNum, ref) {
@@ -63,6 +64,8 @@ function addNewLine(amount, index, array) {
     let ref = '';
     if (new RegExp(regexRef).test(array[index - 2])) {
         ref = array[index - 2];
+    } else if (new RegExp(regexRef).test(array[index - 1])) {
+        ref = array[index - 1];
     }
     let newLine = new singleLine(projectNum, ref);
 
