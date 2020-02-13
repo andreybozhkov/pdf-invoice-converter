@@ -13,9 +13,9 @@ let dataBuffer = fs.readFileSync('./data/invoice.pdf');
 pdf(dataBuffer).then(function(data) {
     let matches = data.text.match(regexp);
     let lines = generateLines(matches);
-    readUserInput().then(a => {
-        console.log(a);
-        generateWorkbook(lines);
+    readUserInput().then(checkForOtherInvoices => {
+        let workbook = generateWorkbook(lines, checkForOtherInvoices);
+        writeWorkbook(workbook);
     });
 });
 
@@ -79,22 +79,26 @@ function addNewLine (amount, index, array) {
     return newLine;
 }
 
-function generateWorkbook (data) {
+function generateWorkbook (data, checkForOtherInvoices) {
     let workbook = XLSX.utils.book_new();
     let newData = [];
+    let expenseLinesWorkbook;
+    let expenseLines;
+
+    let otherFerryInvoices = false;
+    if (checkForOtherInvoices) {
+        expenseLinesWorkbook = XLSX.readFile('./data/Expense lines TT DFDS 20200213.xlsx', {
+            type: 'string'
+        });
+        expenseLines = XLSX.utils.sheet_to_json(expenseLinesWorkbook.Sheets['Sheet1']);
+    };
+
     data.forEach(l => {
-        /*let l
-        l['Article Code'] = '304';
-        l['Article Name'] = 'Ferry';
-        l['Quantity'] = 1;
-        l['Product Unit'] = 'Pcs';
-        l['Unit Price'] = l.summedAmount;
-        l['Shipment ID'] = '';
-        l['NET SUM'] = '';
-        l['Gross Sum'] = '';
-        l['Project ID'] = l.projNum;
-        console.log(l);*/
-        newData.push({
+        if (checkForOtherInvoices) {
+            otherFerryInvoices = findInExpenseLinesWorkbook(expenseLines, l.projNum);
+        };
+
+        let newLine = {
             'Article Code': '304',
             'Article Name': 'Ferry',
             'Quantity': 1,
@@ -104,12 +108,17 @@ function generateWorkbook (data) {
             'NET SUM': '',
             'Gross Sum': '',
             'Project ID': l.projNum,
-            'Shipping Order ID': ''
-        });
+            'Shipping Order ID': '',
+            'Other ferry invoices?': otherFerryInvoices
+        };
+        newData.push(newLine);
     });
-    //console.log(newData);
     let worksheet = XLSX.utils.json_to_sheet(newData);
     XLSX.utils.book_append_sheet(workbook, worksheet, 'Sheet1');
+    return workbook;
+}
+
+function writeWorkbook (workbook) {
     XLSX.writeFile(workbook, './data/output.xlsx');
 }
 
@@ -131,4 +140,14 @@ function readUserInput () {
             rl.close();
         });
     });
+}
+
+function findInExpenseLinesWorkbook (expenseLines, projectNr) {
+    let found = false;
+    expenseLines.findIndex(l => {
+        if (l['Project ID'].toString() === projectNr) {
+            found = true;
+        }
+    });
+    return found;
 }
