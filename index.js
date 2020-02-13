@@ -1,6 +1,7 @@
 const fs = require('fs');
 const pdf = require('pdf-parse');
 const XLSX = require('xlsx');
+const readline = require('readline');
 let regexRef = '\\b2020\\d{5}\\b';
 let regexProjNum = '\\b204\\d{4}\\b';
 let regexNum = '\\b\\d{1,6}\\.\\d{2}\\b';
@@ -12,7 +13,10 @@ let dataBuffer = fs.readFileSync('./data/invoice.pdf');
 pdf(dataBuffer).then(function(data) {
     let matches = data.text.match(regexp);
     let lines = generateLines(matches);
-    generateWorkbook(lines);
+    readUserInput().then(a => {
+        console.log(a);
+        generateWorkbook(lines);
+    });
 });
 
 function singleLine (projNum, ref) {
@@ -75,14 +79,6 @@ function addNewLine (amount, index, array) {
     return newLine;
 }
 
-function sumLines (linesArray) {
-    let sum = 0;
-    linesArray.forEach(l => {
-        sum += l.summedAmount;
-    });
-    return sum;
-}
-
 function generateWorkbook (data) {
     let workbook = XLSX.utils.book_new();
     let newData = [];
@@ -115,4 +111,24 @@ function generateWorkbook (data) {
     let worksheet = XLSX.utils.json_to_sheet(newData);
     XLSX.utils.book_append_sheet(workbook, worksheet, 'Sheet1');
     XLSX.writeFile(workbook, './data/output.xlsx');
+}
+
+function readUserInput () {
+    const rl = readline.createInterface({
+        input: process.stdin,
+        output: process.stdout
+    });
+
+    let userInput = false;
+
+    return new Promise((resolve, reject) => {
+        rl.question('Would you like to check if projects have another ferry and you have a relevant excel file in the data directory? Answer only with "yes" or "no". ', (answer) => {
+            if (answer === 'yes') {
+                userInput = true;
+            }
+            console.log(`Thanks for saying: ${answer}`);
+            resolve(userInput);
+            rl.close();
+        });
+    });
 }
