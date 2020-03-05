@@ -87,7 +87,7 @@ function generateWorkbook (data, checkForOtherInvoices) {
 
     let otherFerryInvoices = false;
     if (checkForOtherInvoices) {
-        expenseLinesWorkbook = XLSX.readFile('./data/Expense lines TT DFDS 20200213.xlsx', {
+        expenseLinesWorkbook = XLSX.readFile('./data/Expense lines TT DFDS.xlsx', {
             type: 'string'
         });
         expenseLines = XLSX.utils.sheet_to_json(expenseLinesWorkbook.Sheets['Sheet1']);
